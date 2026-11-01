@@ -357,8 +357,3 @@ footer {
   display: none !important;
 }
 
-/* Début du verso */
-.pdf-exporting main > .panel:nth-child(6) {
-  break-before: page !important;
-  page-break-before: always !important;
-}

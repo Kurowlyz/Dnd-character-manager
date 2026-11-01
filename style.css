@@ -457,5 +457,19 @@ body.pdf-exporting main > .panel:nth-child(6) {
   break-before: page !important;
   page-break-before: always !important;
 }
+/* Réduction globale du contenu pour tenir sur 2 pages */
+body.pdf-exporting main {
+  zoom: 0.72 !important;
+  width: 263.9mm !important;
+  max-width: none !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Évite les coupures inutiles dans les sections */
+body.pdf-exporting main > .panel {
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+}
 
 

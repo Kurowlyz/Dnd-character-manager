@@ -1,405 +1,490 @@
+
+/* =========================================
+   D&D CHARACTER MANAGER
+   Design Fantasy - Responsive
+========================================= */
+
 * {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  background: #17191f;
-  color: #eee;
-  font-family: Arial, sans-serif;
+:root {
+  --background: #17191f;
+  --panel: #242833;
+  --panel-inner: #1b1e26;
+  --border: #484d59;
+  --gold: #e7b968;
+  --gold-dark: #9b6a2e;
+  --text: #eeeeee;
+  --muted: #aaa;
 }
 
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* =========================================
+   EN-TÊTE
+========================================= */
+
 header {
-  background: #242833;
-  padding: 20px 12px;
+  background: #20232c;
+  padding: 24px 15px;
   text-align: center;
-  border-bottom: 2px solid #bd8b42;
+  border-bottom: 3px solid var(--gold-dark);
 }
 
 header h1 {
-  color: #e7b968;
-  font-size: 21px;
+  color: var(--gold);
+  font-size: 24px;
+  margin: 0 0 5px;
 }
 
-header p, .hint {
-  color: #aaa;
-  font-size: 13px;
+header p {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 18px;
 }
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
+/* =========================================
+   CONTENU PRINCIPAL
+========================================= */
+
 main {
-  max-width: 850px;
-  margin: auto;
-  padding: 12px;
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 18px;
 }
 
 .panel {
-  background: #242833;
-  border: 1px solid #414653;
+  background: var(--panel);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 15px;
-  break-inside: avoid;
+  padding: 18px;
+  margin-bottom: 18px;
+  min-width: 0;
 }
 
+/* =========================================
+   TITRES
+========================================= */
+
 h2 {
-  color: #e7b968;
+  color: var(--gold);
   font-size: 19px;
-  border-bottom: 1px solid #555;
+  margin: 0 0 16px;
   padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
 }
 
 h3 {
-  color: #e7b968;
-  font-size: 15px;
+  color: var(--gold);
+  font-size: 16px;
+  margin: 20px 0 10px;
 }
+
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* =========================================
+   GRILLES ET IDENTITÉ
+========================================= */
 
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 12px 16px;
+}
+
+.grid > div,
+.grid > label {
+  min-width: 0;
 }
 
 label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin: 9px 0;
+  margin: 7px 0;
+  color: #d5d5d5;
   font-size: 13px;
-  color: #ccc;
+  font-weight: 600;
 }
 
-input, select, textarea {
+/* =========================================
+   CHAMPS
+========================================= */
+
+input,
+select,
+textarea {
+  display: block;
   width: 100%;
-  background: #17191f;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 12px;
+  background: var(--panel-inner);
   color: white;
   border: 1px solid #555d6c;
-  border-radius: 6px;
-  padding: 10px;
+  border-radius: 7px;
+  font-family: inherit;
   font-size: 15px;
-  min-width: 0;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px #e7b96830;
 }
 
 input[readonly] {
   background: #343a47;
-  color: #e7b968;
+  color: var(--gold);
   font-weight: bold;
 }
 
 textarea {
-  min-height: 75px;
+  min-height: 90px;
   resize: vertical;
 }
 
+/* =========================================
+   CARACTÉRISTIQUES
+========================================= */
+
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 9px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .stats div {
-  background: #17191f;
-  padding: 10px;
-  border-radius: 8px;
+  background: var(--panel-inner);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 12px;
   text-align: center;
-  color: #e7b968;
+  color: var(--gold);
   font-weight: bold;
+  font-size: 14px;
 }
 
 .stats input {
   margin-top: 8px;
   text-align: center;
+  font-size: 19px;
+  font-weight: bold;
 }
 
+/* =========================================
+   BOUTONS
+========================================= */
+
 button {
-  background: #9b6a2e;
+  background: var(--gold-dark);
   color: white;
-  border: 0;
+  border: 1px solid #bd8b42;
   border-radius: 7px;
-  padding: 11px 14px;
-  font-weight: bold;
+  padding: 11px 15px;
   margin: 5px 2px;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #bd8b42;
 }
 
 button:active {
-  background: #bd8b42;
+  transform: scale(0.98);
 }
+
+/* =========================================
+   SAUVEGARDES ET COMPÉTENCES
+========================================= */
 
 .list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
+  gap: 9px;
 }
 
 .row-item {
-  background: #17191f;
-  padding: 9px;
-  border-radius: 7px;
-  margin: 7px 0;
+  background: var(--panel-inner);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px;
+  margin: 4px 0;
+  min-width: 0;
 }
 
 .row-item label {
   margin: 4px 0;
 }
 
-.row-item button {
-  background: #733e3e;
-}
-
 .skill-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  background: #17191f;
-  padding: 8px;
-  border-radius: 6px;
+  gap: 10px;
+  min-width: 0;
+  background: var(--panel-inner);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px;
   font-size: 13px;
 }
 
 .skill-line input {
-  width: auto;
+  width: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--gold);
 }
 
 .skill-line strong {
-  color: #e7b968;
+  color: var(--gold);
+  white-space: nowrap;
 }
+
+/* =========================================
+   MAGIE
+========================================= */
 
 .slots {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
 }
+
+/* =========================================
+   PIED DE PAGE
+========================================= */
 
 footer {
   text-align: center;
   padding: 20px;
+  border-top: 1px solid var(--border);
 }
 
-@media(max-width: 420px) {
+/* =========================================
+   TABLETTES
+========================================= */
+
+@media (max-width: 700px) {
+  main {
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 14px;
+    margin-bottom: 13px;
+  }
+
+  header h1 {
+    font-size: 21px;
+  }
+}
+
+/* =========================================
+   TÉLÉPHONES
+========================================= */
+
+@media (max-width: 480px) {
+
+  main {
+    padding: 9px;
+  }
+
+  .panel {
+    padding: 12px;
+    border-radius: 9px;
+  }
+
+  header {
+    padding: 18px 10px;
+  }
+
+  header h1 {
+    font-size: 19px;
+  }
+
   .grid {
     grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .stats div {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .stats input {
+    padding: 7px 3px;
+    font-size: 17px;
+  }
+
+  .list {
+    grid-template-columns: 1fr;
+  }
+
+  .slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  button {
+    padding: 11px 12px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 
+/* =========================================
+   IMPRESSION
+========================================= */
+
 @media print {
-  body {
-    background: white;
-    color: black;
+
+  @page {
+    size: A4;
+    margin: 10mm;
   }
 
-  header, footer, button {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  header,
+  footer,
+  button {
     display: none !important;
   }
 
   main {
-    max-width: none;
-    padding: 0;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .panel {
-    background: white;
-    color: black;
-    border: 1px solid #999;
-    margin-bottom: 10px;
-    break-inside: avoid;
-  }
-
-  h2, h3 {
-    color: #754b20;
-  }
-
-  input, select, textarea {
     background: white !important;
     color: black !important;
-    border: 1px solid #aaa;
+    border: 1px solid #999 !important;
+    border-radius: 4px !important;
+    padding: 10px !important;
+    margin-bottom: 8px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
-  .row-item, .skill-line, .stats div {
-    background: white;
-    color: black;
-    border: 1px solid #ddd;
+  h2,
+  h3 {
+    color: #754b20 !important;
+  }
+
+  input,
+  select,
+  textarea {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #aaa !important;
+  }
+
+  .row-item,
+  .skill-line,
+  .stats div {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ccc !important;
   }
 
   .hint {
-    color: #555;
+    color: #555 !important;
   }
-}/* STYLE EXPORT PDF */
-
-.pdf-exporting {
-  background: white !important;
-  color: black !important;
 }
 
-.pdf-exporting .panel {
-  background: white !important;
-  color: black !important;
-  border: 1px solid #999;
-}
-
-.pdf-exporting h2,
-.pdf-exporting h3 {
-  color: #754b20 !important;
-}
-
-.pdf-exporting input,
-.pdf-exporting select,
-.pdf-exporting textarea {
-  background: white !important;
-  color: black !important;
-}
-
-.pdf-exporting button {
-  display: none !important;
-}
-
-.pdf-exporting .skill-line,
-.pdf-exporting .row-item,
-.pdf-exporting .stats div {
-  background: white !important;
-  color: black !important;
-  border: 1px solid #ddd;
-}
-/* =================================
-   EXPORT PDF RECTO-VERSO
-================================= */
-
-.pdf-exporting body {
-  background: white !important;
-}
-
-.pdf-exporting main {
-  width: 190mm !important;
-  max-width: 190mm !important;
-  margin: 0 auto !important;
-  padding: 0 !important;
-  color: black !important;
-  font-size: 9px !important;
-}
-
-.pdf-exporting .panel {
-  background: white !important;
-  color: black !important;
-  border: 1px solid #888 !important;
-  border-radius: 4px !important;
-  padding: 7px !important;
-  margin-bottom: 5px !important;
-}
-
-.pdf-exporting h2 {
-  font-size: 13px !important;
-  margin: 3px 0 6px !important;
-  padding-bottom: 3px !important;
-  color: #754b20 !important;
-}
-
-.pdf-exporting h3 {
-  font-size: 10px !important;
-  margin: 4px 0 !important;
-}
-
-.pdf-exporting label {
-  font-size: 9px !important;
-  margin: 3px 0 !important;
-  gap: 3px !important;
-}
-
-.pdf-exporting input,
-.pdf-exporting select,
-.pdf-exporting textarea {
-  background: white !important;
-  color: black !important;
-  border: 1px solid #aaa !important;
-  padding: 4px !important;
-  font-size: 9px !important;
-}
-
-.pdf-exporting textarea {
-  min-height: 30px !important;
-}
-
-.pdf-exporting .grid {
-  gap: 5px !important;
-}
-
-.pdf-exporting .stats {
-  gap: 4px !important;
-}
-
-.pdf-exporting .stats div,
-.pdf-exporting .skill-line,
-.pdf-exporting .row-item {
-  background: white !important;
-  color: black !important;
-  border: 1px solid #ccc !important;
-  padding: 5px !important;
-  margin: 3px 0 !important;
-}
-
-.pdf-exporting .skill-line {
-  font-size: 9px !important;
-}
-
-.pdf-exporting .hint {
-  color: #555 !important;
-}
-
-.pdf-exporting button,
-.pdf-exporting header,
-.pdf-exporting footer {
-  display: none !important;
-}
-
-/* ===================================
-   OPTIMISATION PDF - 2 PAGES A4
-=================================== */
+/* =========================================
+   EXPORT PDF HTML2PDF
+========================================= */
 
 body.pdf-exporting {
   background: white !important;
+  color: black !important;
+}
+
+body.pdf-exporting header,
+body.pdf-exporting footer,
+body.pdf-exporting button {
+  display: none !important;
 }
 
 body.pdf-exporting main {
-  width: 190mm !important;
-  max-width: 190mm !important;
-  margin: 0 auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
   padding: 0 !important;
-  color: black !important;
-  font-size: 8px !important;
+  zoom: 1 !important;
+  font-size: 10px !important;
 }
 
-body.pdf-exporting main > .panel {
+body.pdf-exporting .panel {
   background: white !important;
   color: black !important;
   border: 1px solid #999 !important;
-  border-radius: 3px !important;
-  padding: 5px !important;
-  margin: 0 0 4px !important;
-  break-inside: avoid !important;
-  page-break-inside: avoid !important;
+  border-radius: 4px !important;
+  padding: 8px !important;
+  margin-bottom: 6px !important;
 }
 
 body.pdf-exporting h2 {
-  font-size: 11px !important;
-  margin: 2px 0 4px !important;
-  padding-bottom: 2px !important;
+  color: #754b20 !important;
+  font-size: 14px !important;
+  margin: 2px 0 7px !important;
+  padding-bottom: 4px !important;
 }
 
 body.pdf-exporting h3 {
-  font-size: 9px !important;
-  margin: 3px 0 !important;
+  color: #754b20 !important;
+  font-size: 11px !important;
+  margin: 6px 0 !important;
 }
 
 body.pdf-exporting label {
-  font-size: 8px !important;
-  margin: 2px 0 !important;
-  gap: 2px !important;
+  color: #333 !important;
+  font-size: 10px !important;
+  margin: 3px 0 !important;
+  gap: 3px !important;
 }
 
 body.pdf-exporting input,
@@ -408,68 +493,37 @@ body.pdf-exporting textarea {
   background: white !important;
   color: black !important;
   border: 1px solid #aaa !important;
-  padding: 2px !important;
-  font-size: 8px !important;
-  min-height: 18px !important;
+  padding: 4px !important;
+  font-size: 10px !important;
+  min-height: 22px !important;
 }
 
 body.pdf-exporting textarea {
-  min-height: 24px !important;
-  height: 24px !important;
+  min-height: 35px !important;
 }
 
 body.pdf-exporting .grid {
-  gap: 3px !important;
+  gap: 5px !important;
 }
 
 body.pdf-exporting .stats {
-  gap: 3px !important;
+  gap: 5px !important;
 }
 
-body.pdf-exporting .list {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 2px !important;
-}
-
+body.pdf-exporting .stats div,
 body.pdf-exporting .skill-line,
-body.pdf-exporting .row-item,
-body.pdf-exporting .stats div {
+body.pdf-exporting .row-item {
   background: white !important;
   color: black !important;
   border: 1px solid #ccc !important;
-  padding: 3px !important;
-  margin: 2px 0 !important;
+  padding: 5px !important;
+}
+
+body.pdf-exporting .list {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 4px !important;
 }
 
 body.pdf-exporting .hint {
   color: #555 !important;
 }
-
-body.pdf-exporting button,
-body.pdf-exporting header,
-body.pdf-exporting footer {
-  display: none !important;
-}
-
-/* Début du verso */
-body.pdf-exporting main > .panel:nth-child(6) {
-  break-before: page !important;
-  page-break-before: always !important;
-}
-/* Réduction globale du contenu pour tenir sur 2 pages */
-body.pdf-exporting main {
-  zoom: 0.72 !important;
-  width: 263.9mm !important;
-  max-width: none !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-/* Évite les coupures inutiles dans les sections */
-body.pdf-exporting main > .panel {
-  break-inside: auto !important;
-  page-break-inside: auto !important;
-}
-
-

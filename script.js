@@ -600,30 +600,46 @@ function loadCharacter() {
 // ===================================
 
 
+
 async function exportPDF() {
-  const button = document.activeElement;
-  let clone = null;
+  let wrapper = null;
 
   try {
     if (typeof html2pdf === "undefined") {
-      alert("Le moteur PDF n'est pas chargé. Vérifie ta connexion internet.");
+      alert("Le moteur PDF n'est pas chargé.");
       return;
     }
 
-    const element = document.querySelector("main");
+    const original = document.querySelector("main");
 
-    if (!element) {
-      alert("Impossible de trouver le contenu à exporter.");
+    if (!original) {
+      alert("Contenu introuvable.");
       return;
     }
 
-    // Crée une copie pour le PDF
-    clone = element.cloneNode(true);
+    // Création de la copie
+    const clone = original.cloneNode(true);
 
-    // Supprime les boutons de la copie
-    clone.querySelectorAll("button").forEach(el => el.remove());
+    // Récupération des valeurs actuelles
+    const originalFields =
+      original.querySelectorAll("input, select, textarea");
 
-    // Supprime les lignes dynamiques sans nom
+    const clonedFields =
+      clone.querySelectorAll("input, select, textarea");
+
+    originalFields.forEach((field, i) => {
+      if (!clonedFields[i]) return;
+
+      clonedFields[i].value = field.value;
+      clonedFields[i].checked = field.checked;
+    });
+
+    // Suppression des boutons
+    clone.querySelectorAll("button").forEach(button => {
+      button.remove();
+    });
+
+    // Suppression des éléments dynamiques vides
     const emptyRows = [
       [".row-item", ".attack-name"],
       [".row-item", ".ability-name"],
@@ -634,22 +650,21 @@ async function exportPDF() {
 
     emptyRows.forEach(([rowSelector, nameSelector]) => {
       clone.querySelectorAll(rowSelector).forEach(row => {
-        const name = row.querySelector(nameSelector);
+        const field = row.querySelector(nameSelector);
 
-        if (!name || !name.value.trim()) {
+        if (!field || !field.value.trim()) {
           row.remove();
         }
       });
     });
 
-    // Masque les champs facultatifs vides
+    // Masquage des champs facultatifs vides
     clone.querySelectorAll("label").forEach(label => {
-      const fields = label.querySelectorAll("input, textarea");
+      const fields = label.querySelectorAll(
+        "input:not([type='checkbox']), textarea"
+      );
 
       if (!fields.length) return;
-
-      // Ne masque pas les cases à cocher
-      if (label.querySelector('input[type="checkbox"]')) return;
 
       const hasContent = Array.from(fields).some(field =>
         field.value.trim() !== ""
@@ -660,14 +675,30 @@ async function exportPDF() {
       }
     });
 
-    // Prépare l'export
+    // Préparation du conteneur PDF
     document.body.classList.add("pdf-exporting");
 
-    const filename =
-      (($("name").value || "Personnage").trim() || "Personnage") + ".pdf";
+    wrapper = document.createElement("div");
 
+    wrapper.style.width = "194mm";
+    wrapper.style.position = "absolute";
+    wrapper.style.left = "0";
+    wrapper.style.top = "0";
+    wrapper.style.zIndex = "9999";
+    wrapper.style.background = "white";
+
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    // Nom du fichier
+    const filename =
+      (($("name").value || "Personnage").trim() || "Personnage")
+      + ".pdf";
+
+    // Configuration PDF
     const options = {
       margin: [8, 8, 8, 8],
+
       filename: filename,
 
       image: {
@@ -676,10 +707,11 @@ async function exportPDF() {
       },
 
       html2canvas: {
-        scale: 1.5,
+        scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
-        logging: false
+        logging: false,
+        windowWidth: 1000
       },
 
       jsPDF: {
@@ -700,14 +732,15 @@ async function exportPDF() {
 
   } catch (error) {
     console.error("Erreur PDF :", error);
-    alert("Une erreur est survenue pendant la création du PDF.");
+    alert("Erreur pendant la création du PDF.");
 
   } finally {
-    document.body.classList.remove("pdf-exporting");
 
-    if (button && button.focus) {
-      button.focus();
+    if (wrapper) {
+      wrapper.remove();
     }
+
+    document.body.classList.remove("pdf-exporting");
   }
 }
 

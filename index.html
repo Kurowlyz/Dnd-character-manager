@@ -1,276 +1,192 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>D&D Character Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-<header>
-  <h1>⚔️ D&D CHARACTER MANAGER</h1>
-  <p>Gestionnaire de personnages – D&D 5e</p>
-
-  <div class="actions">
-    <button onclick="saveCharacter()">💾 Sauvegarder</button>
-    <button onclick="loadCharacter()">📂 Charger</button>
-    <button onclick="exportPDF()">📄 Exporter PDF</button>
+<header class="app-header">
+  <div class="header-inner">
+    <div>
+      <p class="eyebrow">Registre des aventuriers</p>
+      <h1>⚔ D&D Character Manager</h1>
+      <p class="subtitle">Feuille de personnage · Donjons & Dragons 5e</p>
+    </div>
+    <div class="actions">
+      <button type="button" onclick="saveCharacter()">💾 Sauvegarder</button>
+      <button type="button" onclick="loadCharacter()">📂 Charger</button>
+      <button type="button" onclick="exportPDF()">📄 Exporter en PDF</button>
+    </div>
   </div>
 </header>
 
-<main>
-
-  <!-- IDENTITÉ -->
-  <section class="panel">
-    <h2>Identité</h2>
-
-    <div class="grid">
-      <label>Nom
-        <input id="name">
-      </label>
-
-      <label>Race
-        <input id="race">
-      </label>
-
+<main id="character-sheet">
+  <section class="sheet-page">
+    <div class="sheet-heading">
+      <span class="ornament">✦</span>
       <div>
-        <label>Classe
-          <select id="class"></select>
-        </label>
-
-        <button type="button" onclick="addClass()">
-          + Créer une classe
-        </button>
+        <p class="eyebrow">Chroniques d'aventure</p>
+        <h2>Identité du personnage</h2>
       </div>
-
-      <label>Niveau
-        <input id="level" type="number" min="1" max="20" value="1">
-      </label>
-
-      <label>Historique
-        <input id="background">
-      </label>
-
-      <label>Alignement
-        <input id="alignment">
-      </label>
-    </div>
-  </section>
-
-  <!-- CARACTÉRISTIQUES -->
-  <section class="panel">
-    <h2>Caractéristiques</h2>
-
-    <div class="stats">
-      <div>FOR<input id="str" type="number" value="10"></div>
-      <div>DEX<input id="dex" type="number" value="10"></div>
-      <div>CON<input id="con" type="number" value="10"></div>
-      <div>INT<input id="int" type="number" value="10"></div>
-      <div>SAG<input id="wis" type="number" value="10"></div>
-      <div>CHA<input id="cha" type="number" value="10"></div>
+      <span class="ornament">✦</span>
     </div>
 
-    <p id="modifiers"></p>
-  </section>
+    <section class="panel identity-panel">
+      <div class="identity-grid">
+        <label class="field field-wide">Nom du personnage<input id="name" placeholder="Nom de l'aventurier"></label>
+        <label class="field">Race<input id="race" placeholder="Race"></label>
+        <label class="field">Classe
+          <select id="class"></select>
+          <button type="button" class="small-button" onclick="addClass()">+ Créer une classe</button>
+        </label>
+        <label class="field">Niveau<input id="level" type="number" min="1" max="20" value="1"></label>
+        <label class="field">Historique<input id="background" placeholder="Historique"></label>
+        <label class="field">Alignement<input id="alignment" placeholder="Alignement"></label>
+      </div>
+    </section>
 
-  <!-- COMBAT -->
-  <section class="panel">
-    <h2>Combat</h2>
+    <div class="top-layout">
+      <section class="panel ability-panel">
+        <div class="section-title"><span>01</span><h2>Caractéristiques</h2></div>
+        <div class="stats">
+          <div class="stat-box"><span class="stat-name">FOR</span><input id="str" type="number" value="10"><small>Force</small></div>
+          <div class="stat-box"><span class="stat-name">DEX</span><input id="dex" type="number" value="10"><small>Dextérité</small></div>
+          <div class="stat-box"><span class="stat-name">CON</span><input id="con" type="number" value="10"><small>Constitution</small></div>
+          <div class="stat-box"><span class="stat-name">INT</span><input id="int" type="number" value="10"><small>Intelligence</small></div>
+          <div class="stat-box"><span class="stat-name">SAG</span><input id="wis" type="number" value="10"><small>Sagesse</small></div>
+          <div class="stat-box"><span class="stat-name">CHA</span><input id="cha" type="number" value="10"><small>Charisme</small></div>
+        </div>
+        <p id="modifiers" class="modifier-summary"></p>
+      </section>
 
-    <div class="grid">
-      <label>Points de vie actuels
-        <input id="hp" type="number" value="10">
-      </label>
-
-      <label>Points de vie maximum
-        <input id="maxhp" readonly>
-      </label>
-
-      <label>Classe d'armure
-        <input id="ac" readonly>
-      </label>
-
-      <label>Initiative
-        <input id="initiative" readonly>
-      </label>
-
-      <label>Vitesse (pieds)
-        <input id="speed" type="number" value="30">
-      </label>
-
-      <label>Bonus de maîtrise
-        <input id="prof" readonly>
-      </label>
-
-      <label>Type d'armure
-        <select id="armor">
-          <option value="none">Sans armure</option>
-          <option value="light">Légère (cuir)</option>
-          <option value="medium">Intermédiaire (cuirasse)</option>
-          <option value="heavy">Lourde (harnois)</option>
-          <option value="custom">Personnalisée</option>
-        </select>
-      </label>
-
-      <label>CA de base personnalisée
-        <input id="customAC" type="number" value="10">
-      </label>
-
-      <label>Bouclier équipé
-        <select id="shield">
-          <option value="0">Non</option>
-          <option value="2">Oui (+2 CA)</option>
-        </select>
-      </label>
-    </div>
-  </section>
-
-  <!-- SAUVEGARDES -->
-  <section class="panel">
-    <h2>Jets de sauvegarde</h2>
-    <div id="saves" class="list"></div>
-  </section>
-
-  <!-- COMPÉTENCES -->
-  <section class="panel">
-    <h2>Compétences</h2>
-    <p class="hint">
-      Coche les maîtrises. Les bonus sont calculés automatiquement.
-    </p>
-    <div id="skills" class="list"></div>
-  </section>
-
-  <!-- ATTAQUES -->
-  <section class="panel">
-    <h2>Attaques et techniques</h2>
-    <div id="attacks"></div>
-    <button onclick="addAttack()">+ Ajouter une attaque</button>
-  </section>
-
-  <!-- CAPACITÉS -->
-  <section class="panel">
-    <h2>Capacités spéciales et pouvoirs</h2>
-    <div id="abilities"></div>
-    <button onclick="addAbility()">+ Ajouter une capacité</button>
-  </section>
-
-  <!-- MAGIE -->
-  <section class="panel">
-    <h2>Magie et sorts</h2>
-
-    <div class="grid">
-      <label>Caractéristique magique
-        <select id="magicStat">
-          <option value="int">Intelligence</option>
-          <option value="wis">Sagesse</option>
-          <option value="cha">Charisme</option>
-        </select>
-      </label>
-
-      <label>Degré de difficulté des sorts
-        <input id="spellDC" readonly>
-      </label>
-
-      <label>Bonus d'attaque magique
-        <input id="spellAttack" readonly>
-      </label>
+      <section class="panel combat-panel">
+        <div class="section-title"><span>02</span><h2>Combat</h2></div>
+        <div class="combat-highlights">
+          <label class="combat-stat"><span>Classe d'armure</span><input id="ac" readonly></label>
+          <label class="combat-stat"><span>Initiative</span><input id="initiative" readonly></label>
+          <label class="combat-stat"><span>Vitesse (pieds)</span><input id="speed" type="number" value="30"></label>
+        </div>
+        <div class="combat-grid">
+          <label class="field">PV actuels<input id="hp" type="number" value="10"></label>
+          <label class="field">PV maximum<input id="maxhp" readonly></label>
+          <label class="field">Bonus de maîtrise<input id="prof" readonly></label>
+          <label class="field">Type d'armure
+            <select id="armor">
+              <option value="none">Sans armure</option>
+              <option value="light">Légère (cuir)</option>
+              <option value="medium">Intermédiaire (cuirasse)</option>
+              <option value="heavy">Lourde (harnois)</option>
+              <option value="custom">Personnalisée</option>
+            </select>
+          </label>
+          <label class="field">CA personnalisée<input id="customAC" type="number" value="10"></label>
+          <label class="field">Bouclier
+            <select id="shield"><option value="0">Non</option><option value="2">Oui (+2 CA)</option></select>
+          </label>
+        </div>
+      </section>
     </div>
 
-    <h3>Emplacements de sorts</h3>
-    <div class="slots" id="slots"></div>
-
-    <button onclick="addSpell()">+ Ajouter un sort</button>
-    <div id="spells"></div>
-  </section>
-
-  <!-- INVENTAIRE -->
-  <section class="panel">
-    <h2>Inventaire et équipement</h2>
-
-    <h3>Équipement</h3>
-    <div id="equipment"></div>
-    <button onclick="addEquipment()">+ Ajouter un équipement</button>
-
-    <h3>Inventaire</h3>
-    <div id="inventory"></div>
-    <button onclick="addItem()">+ Ajouter un objet</button>
-
-    <h3>Monnaie</h3>
-
-    <div class="grid">
-      <label>Pièces de cuivre (PC)
-        <input id="pc" type="number" value="0">
-      </label>
-
-      <label>Pièces d'argent (PA)
-        <input id="pa" type="number" value="0">
-      </label>
-
-      <label>Pièces d'électrum (PE)
-        <input id="pe" type="number" value="0">
-      </label>
-
-      <label>Pièces d'or (PO)
-        <input id="po" type="number" value="0">
-      </label>
-
-      <label>Pièces de platine (PP)
-        <input id="pp" type="number" value="0">
-      </label>
+    <div class="middle-layout">
+      <section class="panel">
+        <div class="section-title"><span>03</span><h2>Jets de sauvegarde</h2></div>
+        <p class="hint">Coche les maîtrises de ton personnage.</p>
+        <div id="saves" class="list save-list"></div>
+      </section>
+      <section class="panel">
+        <div class="section-title"><span>04</span><h2>Compétences</h2></div>
+        <p class="hint">Les bonus sont calculés automatiquement.</p>
+        <div id="skills" class="list skill-list"></div>
+      </section>
     </div>
+
+    <section class="panel">
+      <div class="section-title"><span>05</span><h2>Attaques et techniques</h2></div>
+      <div id="attacks"></div>
+      <button type="button" onclick="addAttack()">+ Ajouter une attaque</button>
+    </section>
+
+    <section class="panel">
+      <div class="section-title"><span>06</span><h2>Capacités spéciales et pouvoirs</h2></div>
+      <div id="abilities"></div>
+      <button type="button" onclick="addAbility()">+ Ajouter une capacité</button>
+    </section>
   </section>
 
-  <!-- PERSONNALITÉ -->
-  <section class="panel">
-    <h2>Personnalité et apparence</h2>
+  <section class="sheet-page">
+    <div class="sheet-heading">
+      <span class="ornament">✦</span>
+      <div><p class="eyebrow">Savoir et possessions</p><h2>Magie & équipement</h2></div>
+      <span class="ornament">✦</span>
+    </div>
 
-    <label>Traits de personnalité
-      <textarea id="personality"></textarea>
-    </label>
+    <section class="panel">
+      <div class="section-title"><span>07</span><h2>Magie et sorts</h2></div>
+      <div class="grid three-columns">
+        <label class="field">Caractéristique magique
+          <select id="magicStat"><option value="int">Intelligence</option><option value="wis">Sagesse</option><option value="cha">Charisme</option></select>
+        </label>
+        <label class="field">DD de sauvegarde des sorts<input id="spellDC" readonly></label>
+        <label class="field">Bonus d'attaque magique<input id="spellAttack" readonly></label>
+      </div>
+      <h3>Emplacements de sorts</h3>
+      <div class="slots" id="slots"></div>
+      <h3>Grimoire et sorts connus</h3>
+      <div id="spells"></div>
+      <button type="button" onclick="addSpell()">+ Ajouter un sort</button>
+    </section>
 
-    <label>Idéaux
-      <textarea id="ideals"></textarea>
-    </label>
+    <section class="panel">
+      <div class="section-title"><span>08</span><h2>Équipement</h2></div>
+      <div id="equipment"></div>
+      <button type="button" onclick="addEquipment()">+ Ajouter un équipement</button>
+      <h3>Inventaire et objets</h3>
+      <div id="inventory"></div>
+      <button type="button" onclick="addItem()">+ Ajouter un objet</button>
+      <h3>Monnaie</h3>
+      <div class="coin-grid">
+        <label class="field">PC<input id="pc" type="number" value="0"></label>
+        <label class="field">PA<input id="pa" type="number" value="0"></label>
+        <label class="field">PE<input id="pe" type="number" value="0"></label>
+        <label class="field">PO<input id="po" type="number" value="0"></label>
+        <label class="field">PP<input id="pp" type="number" value="0"></label>
+      </div>
+    </section>
 
-    <label>Liens
-      <textarea id="bonds"></textarea>
-    </label>
+    <section class="panel">
+      <div class="section-title"><span>09</span><h2>Personnalité et histoire</h2></div>
+      <div class="grid two-columns">
+        <label class="field">Traits de personnalité<textarea id="personality"></textarea></label>
+        <label class="field">Idéaux<textarea id="ideals"></textarea></label>
+        <label class="field">Liens<textarea id="bonds"></textarea></label>
+        <label class="field">Défauts<textarea id="flaws"></textarea></label>
+        <label class="field">Apparence physique<textarea id="appearance"></textarea></label>
+        <label class="field">Histoire du personnage<textarea id="story"></textarea></label>
+      </div>
+    </section>
 
-    <label>Défauts
-      <textarea id="flaws"></textarea>
-    </label>
-
-    <label>Apparence physique
-      <textarea id="appearance"></textarea>
-    </label>
-
-    <label>Histoire du personnage
-      <textarea id="story"></textarea>
-    </label>
+    <section class="panel">
+      <div class="section-title"><span>10</span><h2>Quêtes et objectifs</h2></div>
+      <div id="quests"></div>
+      <button type="button" onclick="addQuest()">+ Ajouter une quête</button>
+    </section>
   </section>
-
-  <!-- QUÊTES -->
-  <section class="panel">
-    <h2>Quêtes et objectifs</h2>
-    <div id="quests"></div>
-    <button onclick="addQuest()">+ Ajouter une quête</button>
-  </section>
-
 </main>
 
-<footer>
-  <button onclick="saveCharacter()">💾 Sauvegarder</button>
-  <button onclick="exportPDF()">📄 Exporter PDF</button>
+<footer class="app-footer">
+  <span>✦ Que les dés vous soient favorables ✦</span>
+  <div class="actions">
+    <button type="button" onclick="saveCharacter()">💾 Sauvegarder</button>
+    <button type="button" onclick="exportPDF()">📄 Exporter en PDF</button>
+  </div>
 </footer>
 
-<!-- MOTEUR PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
-
-<!-- SCRIPT PRINCIPAL -->
 <script src="script.js"></script>
-
 </body>
 </html>

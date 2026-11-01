@@ -4,6 +4,7 @@
 // ===================================
 
 async function exportPDF() {
+  alert("La fonction PDF fonctionne !");
 
   if(typeof html2pdf === "undefined") {
     alert("Impossible de charger le moteur PDF. Vérifie ta connexion internet.");

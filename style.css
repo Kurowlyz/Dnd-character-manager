@@ -357,3 +357,105 @@ footer {
   display: none !important;
 }
 
+/* ===================================
+   OPTIMISATION PDF - 2 PAGES A4
+=================================== */
+
+body.pdf-exporting {
+  background: white !important;
+}
+
+body.pdf-exporting main {
+  width: 190mm !important;
+  max-width: 190mm !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  color: black !important;
+  font-size: 8px !important;
+}
+
+body.pdf-exporting main > .panel {
+  background: white !important;
+  color: black !important;
+  border: 1px solid #999 !important;
+  border-radius: 3px !important;
+  padding: 5px !important;
+  margin: 0 0 4px !important;
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+body.pdf-exporting h2 {
+  font-size: 11px !important;
+  margin: 2px 0 4px !important;
+  padding-bottom: 2px !important;
+}
+
+body.pdf-exporting h3 {
+  font-size: 9px !important;
+  margin: 3px 0 !important;
+}
+
+body.pdf-exporting label {
+  font-size: 8px !important;
+  margin: 2px 0 !important;
+  gap: 2px !important;
+}
+
+body.pdf-exporting input,
+body.pdf-exporting select,
+body.pdf-exporting textarea {
+  background: white !important;
+  color: black !important;
+  border: 1px solid #aaa !important;
+  padding: 2px !important;
+  font-size: 8px !important;
+  min-height: 18px !important;
+}
+
+body.pdf-exporting textarea {
+  min-height: 24px !important;
+  height: 24px !important;
+}
+
+body.pdf-exporting .grid {
+  gap: 3px !important;
+}
+
+body.pdf-exporting .stats {
+  gap: 3px !important;
+}
+
+body.pdf-exporting .list {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 2px !important;
+}
+
+body.pdf-exporting .skill-line,
+body.pdf-exporting .row-item,
+body.pdf-exporting .stats div {
+  background: white !important;
+  color: black !important;
+  border: 1px solid #ccc !important;
+  padding: 3px !important;
+  margin: 2px 0 !important;
+}
+
+body.pdf-exporting .hint {
+  color: #555 !important;
+}
+
+body.pdf-exporting button,
+body.pdf-exporting header,
+body.pdf-exporting footer {
+  display: none !important;
+}
+
+/* Début du verso */
+body.pdf-exporting main > .panel:nth-child(6) {
+  break-before: page !important;
+  page-break-before: always !important;
+}
+
+

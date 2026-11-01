@@ -1,389 +1,1145 @@
-// ===================================
-// D&D CHARACTER MANAGER — SCRIPT CORRIGÉ
-// D&D 5e / compatible avec index.html fourni
-// ===================================
 
 "use strict";
+
+// ===================================
+// D&D CHARACTER MANAGER
+// D&D 5e - Version 2014
+// ===================================
 
 const $ = id => document.getElementById(id);
 const SAVE_KEY = "dndCharacter_v3";
 
-const abilities = {
-  str: "Force", dex: "Dextérité", con: "Constitution",
-  int: "Intelligence", wis: "Sagesse", cha: "Charisme"
+// ===================================
+// DONNÉES
+// ===================================
+
+const abilityNames = {
+  str: "Force",
+  dex: "Dextérité",
+  con: "Constitution",
+  int: "Intelligence",
+  wis: "Sagesse",
+  cha: "Charisme"
 };
 
 const skillData = [
-  ["Acrobaties","dex"],["Arcanes","int"],["Athlétisme","str"],
-  ["Discrétion","dex"],["Dressage","wis"],["Escamotage","dex"],
-  ["Histoire","int"],["Intimidation","cha"],["Investigation","int"],
-  ["Médecine","wis"],["Nature","int"],["Perception","wis"],
-  ["Perspicacité","wis"],["Persuasion","cha"],["Religion","int"],
-  ["Représentation","cha"],["Survie","wis"],["Tromperie","cha"]
+  ["Acrobaties", "dex"],
+  ["Arcanes", "int"],
+  ["Athlétisme", "str"],
+  ["Discrétion", "dex"],
+  ["Dressage", "wis"],
+  ["Escamotage", "dex"],
+  ["Histoire", "int"],
+  ["Intimidation", "cha"],
+  ["Investigation", "int"],
+  ["Médecine", "wis"],
+  ["Nature", "int"],
+  ["Perception", "wis"],
+  ["Perspicacité", "wis"],
+  ["Persuasion", "cha"],
+  ["Religion", "int"],
+  ["Représentation", "cha"],
+  ["Survie", "wis"],
+  ["Tromperie", "cha"]
 ];
 
-let classDatabase = {
-  "Guerrier":{hitDie:10},"Barbare":{hitDie:12},"Paladin":{hitDie:10},
-  "Rôdeur":{hitDie:10},"Roublard":{hitDie:8},"Moine":{hitDie:8},
-  "Barde":{hitDie:8},"Clerc":{hitDie:8},"Druide":{hitDie:8},
-  "Ensorceleur":{hitDie:6},"Magicien":{hitDie:6},"Occultiste":{hitDie:8}
+const classDatabase = {
+  "Barbare": { hitDie: 12 },
+  "Barde": { hitDie: 8 },
+  "Clerc": { hitDie: 8 },
+  "Druide": { hitDie: 8 },
+  "Ensorceleur": { hitDie: 6 },
+  "Guerrier": { hitDie: 10 },
+  "Magicien": { hitDie: 6 },
+  "Moine": { hitDie: 8 },
+  "Occultiste": { hitDie: 8 },
+  "Paladin": { hitDie: 10 },
+  "Rôdeur": { hitDie: 10 },
+  "Roublard": { hitDie: 8 }
 };
 
-function number(id, fallback=0) {
-  const el = $(id);
-  const n = el ? Number(el.value) : fallback;
-  return Number.isFinite(n) ? n : fallback;
-}
-function mod(score) { return Math.floor((score - 10) / 2); }
-function signed(n) { return n >= 0 ? `+${n}` : String(n); }
-function set(id, value) { if ($(id)) $(id).value = value; }
-function profBonus() { return 2 + Math.floor((Math.max(1, Math.min(20, number("level",1))) - 1) / 4); }
+// ===================================
+// OUTILS
+// ===================================
 
-function refreshClasses(selected) {
+function number(value, fallback = 0) {
+  const result = Number(value);
+  return Number.isFinite(result) ? result : fallback;
+}
+
+function mod(score) {
+  return Math.floor((number(score, 10) - 10) / 2);
+}
+
+function signed(value) {
+  return value >= 0 ? `+${value}` : `${value}`;
+}
+
+function set(id, value) {
+  const element = $(id);
+  if (element) element.value = value;
+}
+
+function profBonus(level) {
+  return Math.ceil(number(level, 1) / 4) + 1;
+}
+
+function getValue(id, fallback = 0) {
+  const element = $(id);
+  return element ? number(element.value, fallback) : fallback;
+}
+
+function getStat(stat) {
+  return mod(getValue(stat, 10));
+}
+
+function makeElement(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+// ===================================
+// CHAMPS DYNAMIQUES
+// ===================================
+
+function field(label, className, type = "text", placeholder = "") {
+  const wrapper = makeElement("label", "dynamic-field");
+  wrapper.append(makeElement("span", "", label));
+
+  const input = makeElement("input", className);
+  input.type = type;
+  input.placeholder = placeholder;
+
+  wrapper.append(input);
+  return wrapper;
+}
+
+function textarea(label, className, placeholder = "") {
+  const wrapper = makeElement("label", "dynamic-field");
+  wrapper.append(makeElement("span", "", label));
+
+  const input = makeElement("textarea", className);
+  input.placeholder = placeholder;
+  input.rows = 2;
+
+  wrapper.append(input);
+  return wrapper;
+}
+
+function selectField(label, className, options) {
+  const wrapper = makeElement("label", "dynamic-field");
+  wrapper.append(makeElement("span", "", label));
+
+  const select = makeElement("select", className);
+
+  options.forEach(option => {
+    const opt = document.createElement("option");
+    opt.value = option.value;
+    opt.textContent = option.label;
+    select.append(opt);
+  });
+
+  wrapper.append(select);
+  return wrapper;
+}
+
+function checkboxField(label, className) {
+  const wrapper = makeElement("label", "dynamic-checkbox");
+  const input = makeElement("input", className);
+  input.type = "checkbox";
+
+  wrapper.append(input);
+  wrapper.append(makeElement("span", "", label));
+
+  return wrapper;
+}
+
+function deleteButton() {
+  const button = makeElement("button", "delete-button", "✕");
+  button.type = "button";
+  button.title = "Supprimer";
+
+  button.addEventListener("click", () => {
+    const row = button.closest(".row-item");
+    if (row) row.remove();
+    calculate();
+  });
+
+  return button;
+}
+
+function createRow(containerId, className) {
+  const container = $(containerId);
+  if (!container) return null;
+
+  const row = makeElement("div", `row-item ${className}`);
+  container.append(row);
+
+  return row;
+}
+
+// ===================================
+// CLASSES
+// ===================================
+
+function refreshClasses() {
   const select = $("class");
   if (!select) return;
-  const wanted = selected || select.value || "Guerrier";
-  select.replaceChildren();
+
+  const current = select.value;
+  select.innerHTML = "";
+
   Object.keys(classDatabase).forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name; opt.textContent = name;
-    select.appendChild(opt);
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    select.append(option);
   });
-  select.value = classDatabase[wanted] ? wanted : "Guerrier";
-  calculate();
+
+  const custom = document.querySelectorAll(".custom-class-name");
+
+  custom.forEach(input => {
+    const name = input.value.trim();
+
+    if (name && !classDatabase[name]) {
+      classDatabase[name] = { hitDie: 8 };
+    }
+  });
+
+  Object.keys(classDatabase).forEach(name => {
+    if (![...select.options].some(option => option.value === name)) {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.append(option);
+    }
+  });
+
+  if (current && classDatabase[current]) {
+    select.value = current;
+  }
 }
 
 function addClass() {
-  const name = prompt("Nom de la nouvelle classe :");
+  const name = prompt("Nom de la classe ?");
   if (!name || !name.trim()) return;
-  const clean = name.trim();
-  if (classDatabase[clean]) { alert("Cette classe existe déjà."); return; }
-  const die = Number(prompt("Dé de vie : 6, 8, 10 ou 12", "8"));
-  if (![6,8,10,12].includes(die)) { alert("Dé de vie invalide."); return; }
-  classDatabase[clean] = {hitDie:die};
-  refreshClasses(clean);
-  saveCharacter(false);
-  alert("Classe créée !");
-}
 
-function buildSaveAndSkillLists() {
-  const saves = $("saves"), skills = $("skills");
-  if (saves) {
-    saves.replaceChildren();
-    Object.entries(abilities).forEach(([id,label]) => {
-      const row = document.createElement("div");
-      row.className = "skill-line"; row.dataset.save = id;
-      const lab = document.createElement("label");
-      const cb = document.createElement("input");
-      cb.type = "checkbox"; cb.setAttribute("aria-label", `Maîtrise ${label}`);
-      const span = document.createElement("span"); span.textContent = label;
-      const strong = document.createElement("strong"); strong.textContent = "+0";
-      lab.append(cb,span); row.append(lab,strong); saves.appendChild(row);
-    });
-  }
-  if (skills) {
-    skills.replaceChildren();
-    skillData.forEach(([label,stat]) => {
-      const row = document.createElement("div");
-      row.className = "skill-line"; row.dataset.skill = label; row.dataset.stat = stat;
-      const lab = document.createElement("label");
-      const cb = document.createElement("input");
-      cb.type = "checkbox"; cb.setAttribute("aria-label", `Maîtrise ${label}`);
-      const span = document.createElement("span"); span.textContent = label;
-      const strong = document.createElement("strong"); strong.textContent = "+0";
-      lab.append(cb,span); row.append(lab,strong); skills.appendChild(row);
-    });
-  }
-}
+  const cleanName = name.trim();
 
-function buildSpellSlots() {
-  const root = $("slots");
-  if (!root) return;
-  root.replaceChildren();
-  for (let i=1;i<=9;i++) {
-    const label = document.createElement("label");
-    label.appendChild(document.createTextNode(`Niv. ${i}`));
-    const input = document.createElement("input");
-    input.type="number"; input.min="0"; input.value="0"; input.dataset.slot=String(i);
-    label.appendChild(input); root.appendChild(label);
-  }
-}
-
-function calculate() {
-  if (!$("str")) return;
-  const mods = {};
-  Object.keys(abilities).forEach(id => mods[id] = mod(number(id,10)));
-  const pb = profBonus();
-  set("prof", signed(pb));
-
-  const summary = $("modifiers");
-  if (summary) summary.innerHTML = Object.entries(abilities)
-    .map(([id,label]) => `${label} : <b>${signed(mods[id])}</b>`).join(" · ");
-
-  set("initiative", signed(mods.dex));
-  let ac = 10 + mods.dex;
-  const armor = $("armor")?.value || "none";
-  if (armor === "light") ac = 11 + mods.dex;
-  if (armor === "medium") ac = 14 + Math.min(2,mods.dex);
-  if (armor === "heavy") ac = 16;
-  if (armor === "custom") ac = number("customAC",10);
-  ac += number("shield",0);
-  set("ac", ac);
-
-  const className = $("class")?.value || "Guerrier";
-  const die = classDatabase[className]?.hitDie || 8;
-  const lvl = Math.max(1,Math.min(20,number("level",1)));
-  const hp = die + mods.con + (lvl-1)*(Math.floor(die/2)+1+mods.con);
-  set("maxhp", Math.max(1,hp));
-
-  document.querySelectorAll("[data-save], [data-skill]").forEach(row => {
-    const stat = row.dataset.save || row.dataset.stat;
-    const trained = !!row.querySelector('input[type="checkbox"]')?.checked;
-    const output = row.querySelector("strong");
-    if (output) output.textContent = signed((mods[stat] || 0) + (trained ? pb : 0));
-  });
-
-  const magic = $("magicStat")?.value || "int";
-  set("spellDC", 8 + pb + (mods[magic] || 0));
-  set("spellAttack", signed(pb + (mods[magic] || 0)));
-
-  document.querySelectorAll("[data-attack]").forEach(row => {
-    const stat = row.querySelector(".attack-stat")?.value || "str";
-    const trained = !!row.querySelector(".attack-prof")?.checked;
-    const out = row.querySelector(".attack-bonus");
-    if (out) out.textContent = signed((mods[stat] || 0) + (trained ? pb : 0));
-  });
-}
-
-function field(labelText, className, value="", type="text") {
-  const label = document.createElement("label");
-  label.textContent = labelText;
-  const input = document.createElement("input");
-  input.type = type; input.className = className; input.value = value ?? "";
-  label.appendChild(input); return label;
-}
-function textarea(labelText,className,value="") {
-  const label=document.createElement("label"); label.textContent=labelText;
-  const el=document.createElement("textarea"); el.className=className; el.value=value ?? "";
-  label.appendChild(el); return label;
-}
-function selectField(labelText,className,options,selected) {
-  const label=document.createElement("label"); label.textContent=labelText;
-  const el=document.createElement("select"); el.className=className;
-  options.forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;el.appendChild(o);});
-  if (selected !== undefined) el.value=selected;
-  label.appendChild(el); return label;
-}
-function deleteButton(row) {
-  const b=document.createElement("button"); b.type="button"; b.textContent="Supprimer";
-  b.addEventListener("click",()=>row.remove()); return b;
-}
-function appendRow(target,row) {
-  const root=$(target);
-  if (!root) { console.error(`Conteneur #${target} introuvable`); return; }
-  root.appendChild(row);
-}
-function wireCalculation(row) {
-  row.querySelectorAll("input,select,textarea").forEach(el=>{
-    el.addEventListener("input",calculate);
-    el.addEventListener("change",calculate);
-  });
-}
-
-function addAttack(data={}) {
-  const row=document.createElement("div"); row.className="row-item"; row.dataset.attack="true";
-  row.append(field("Nom de l'attaque","attack-name",data.name||""));
-  row.append(selectField("Caractéristique utilisée","attack-stat",[
-    ["str","Force"],["dex","Dextérité"],["int","Intelligence"],["wis","Sagesse"],["cha","Charisme"]
-  ],data.stat||"str"));
-  const lab=document.createElement("label"); lab.textContent="Maîtrise de l'arme";
-  const cb=document.createElement("input"); cb.type="checkbox"; cb.className="attack-prof"; cb.checked=!!data.prof; lab.appendChild(cb); row.appendChild(lab);
-  const p=document.createElement("p"); p.append("Bonus d’attaque : ");
-  const strong=document.createElement("strong"); strong.className="attack-bonus"; strong.textContent="+0"; p.appendChild(strong); row.appendChild(p);
-  row.append(field("Dégâts (ex : 1d8+3)","attack-damage",data.damage||"1d8"));
-  row.append(field("Type de dégâts","attack-type",data.type||"Tranchant"));
-  row.append(field("Portée","attack-range",data.range||"Corps-à-corps"));
-  row.append(textarea("Description","attack-description",data.description||""));
-  row.append(deleteButton(row)); appendRow("attacks",row); wireCalculation(row); calculate();
-}
-function addAbility(data={}) {
-  const row=document.createElement("div"); row.className="row-item";
-  row.append(field("Nom","ability-name",data.name||""));
-  row.append(selectField("Type","ability-type",[["Passive","Passive"],["Active","Active"],["Réaction","Réaction"]],data.type||"Passive"));
-  row.append(textarea("Description","ability-description",data.description||""));
-  row.append(field("Utilisations / recharge","ability-uses",data.uses||""));
-  row.append(deleteButton(row)); appendRow("abilities",row);
-}
-function addSpell(data={}) {
-  const row=document.createElement("div"); row.className="row-item";
-  row.append(field("Nom du sort","spell-name",data.name||""));
-  row.append(field("Niveau du sort","spell-level",data.level??0,"number"));
-  row.append(field("Temps d'incantation","spell-time",data.time||""));
-  row.append(field("Portée","spell-range",data.range||""));
-  row.append(textarea("Description","spell-description",data.description||""));
-  row.append(deleteButton(row)); appendRow("spells",row);
-}
-function addEquipment(data={}) { addSimpleItem("equipment",data); }
-function addItem(data={}) { addSimpleItem("inventory",data); }
-function addSimpleItem(target,data={}) {
-  const row=document.createElement("div"); row.className="row-item";
-  row.append(field("Nom","item-name",data.name||""));
-  row.append(field("Quantité","item-quantity",data.quantity??1,"number"));
-  row.append(textarea("Description","item-description",data.description||""));
-  row.append(deleteButton(row)); appendRow(target,row);
-}
-function addQuest(data={}) {
-  const row=document.createElement("div"); row.className="row-item";
-  row.append(field("Nom de la quête","quest-name",data.name||""));
-  row.append(textarea("Objectif","quest-objective",data.objective||""));
-  row.append(selectField("Statut","quest-status",[["À faire","À faire"],["En cours","En cours"],["Terminée","Terminée"]],data.status||"À faire"));
-  row.append(deleteButton(row)); appendRow("quests",row);
-}
-
-function collectRows(selector, mapper) {
-  return Array.from(document.querySelectorAll(selector)).map(mapper);
-}
-function read(el) { return el ? el.value : ""; }
-function collectCharacter() {
-  const staticFields={};
-  document.querySelectorAll("#character-sheet input[id], #character-sheet select[id], #character-sheet textarea[id]").forEach(el=>{
-    staticFields[el.id] = el.type==="checkbox" ? el.checked : el.value;
-  });
-  const checks={};
-  document.querySelectorAll("#saves [data-save], #skills [data-skill]").forEach(row=>{
-    const key=row.dataset.save ? `save:${row.dataset.save}` : `skill:${row.dataset.skill}`;
-    checks[key]=!!row.querySelector('input[type="checkbox"]')?.checked;
-  });
-  const slots={};
-  document.querySelectorAll("[data-slot]").forEach(el=>slots[el.dataset.slot]=el.value);
-  return {
-    version:3, classDatabase, staticFields, checks, slots,
-    attacks:collectRows("#attacks [data-attack]",r=>({
-      name:read(r.querySelector(".attack-name")),stat:read(r.querySelector(".attack-stat")),
-      prof:!!r.querySelector(".attack-prof")?.checked,damage:read(r.querySelector(".attack-damage")),
-      type:read(r.querySelector(".attack-type")),range:read(r.querySelector(".attack-range")),
-      description:read(r.querySelector(".attack-description"))
-    })),
-    abilities:collectRows("#abilities .row-item",r=>({
-      name:read(r.querySelector(".ability-name")),type:read(r.querySelector(".ability-type")),
-      description:read(r.querySelector(".ability-description")),uses:read(r.querySelector(".ability-uses"))
-    })),
-    spells:collectRows("#spells .row-item",r=>({
-      name:read(r.querySelector(".spell-name")),level:read(r.querySelector(".spell-level")),
-      time:read(r.querySelector(".spell-time")),range:read(r.querySelector(".spell-range")),
-      description:read(r.querySelector(".spell-description"))
-    })),
-    equipment:collectSimple("equipment"), inventory:collectSimple("inventory"),
-    quests:collectRows("#quests .row-item",r=>({
-      name:read(r.querySelector(".quest-name")),objective:read(r.querySelector(".quest-objective")),
-      status:read(r.querySelector(".quest-status"))
-    }))
-  };
-}
-function collectSimple(id) {
-  return collectRows(`#${id} .row-item`,r=>({
-    name:read(r.querySelector(".item-name")),quantity:read(r.querySelector(".item-quantity")),
-    description:read(r.querySelector(".item-description"))
-  }));
-}
-function saveCharacter(showAlert=true) {
-  try {
-    localStorage.setItem(SAVE_KEY,JSON.stringify(collectCharacter()));
-    if(showAlert) alert("Personnage sauvegardé !");
-  } catch(err) {
-    console.error(err); alert("Échec de la sauvegarde. Vérifie que le stockage du navigateur est autorisé.");
-  }
-}
-function loadCharacter() {
-  let raw=null;
-  try { raw=localStorage.getItem(SAVE_KEY)||localStorage.getItem("dndCharacter_v2")||localStorage.getItem("dndCharacter"); }
-  catch(err) { alert("Le stockage local est inaccessible dans ce navigateur."); return; }
-  if(!raw) { alert("Aucune sauvegarde trouvée."); return; }
-  try {
-    const data=JSON.parse(raw);
-    if(data.classDatabase) classDatabase={...classDatabase,...data.classDatabase};
-
-    ["attacks","abilities","spells","equipment","inventory","quests"].forEach(id=>{if($(id)) $(id).replaceChildren();});
-    (data.attacks||[]).forEach(addAttack);
-    (data.abilities||[]).forEach(addAbility);
-    (data.spells||[]).forEach(addSpell);
-    (data.equipment||[]).forEach(addEquipment);
-    (data.inventory||[]).forEach(addItem);
-    (data.quests||[]).forEach(addQuest);
-
-    refreshClasses(data.staticFields?.class || undefined);
-    if(data.staticFields) Object.entries(data.staticFields).forEach(([id,value])=>{
-      const el=$(id); if(!el) return;
-      if(el.type==="checkbox") el.checked=!!value; else el.value=value;
-    });
-    if(data.checks) Object.entries(data.checks).forEach(([key,value])=>{
-      let row=null;
-      if(key.startsWith("save:")) row=document.querySelector(`[data-save="${CSS.escape(key.slice(5))}"]`);
-      if(key.startsWith("skill:")) row=Array.from(document.querySelectorAll("[data-skill]")).find(r=>r.dataset.skill===key.slice(6));
-      const cb=row?.querySelector('input[type="checkbox"]'); if(cb) cb.checked=!!value;
-    });
-    if(data.slots) Object.entries(data.slots).forEach(([level,value])=>{
-      const el=document.querySelector(`[data-slot="${level}"]`); if(el) el.value=value;
-    });
-    calculate();
-    alert("Personnage chargé !");
-  } catch(err) {
-    console.error("Erreur de chargement :",err);
-    alert("La sauvegarde est illisible ou incompatible.");
-  }
-}
-
-async function exportPDF() {
-  if(typeof html2pdf==="undefined") {
-    alert("La bibliothèque PDF n'est pas chargée. Vérifie ta connexion internet puis réessaie.");
+  if (classDatabase[cleanName]) {
+    alert("Cette classe existe déjà.");
     return;
   }
-  const original=$("character-sheet");
-  if(!original) { alert("La fiche #character-sheet est introuvable."); return; }
-  const clone=original.cloneNode(true);
-  const src=original.querySelectorAll("input,select,textarea");
-  const dst=clone.querySelectorAll("input,select,textarea");
-  src.forEach((el,i)=>{
-    if(!dst[i]) return;
-    dst[i].value=el.value;
-    if(el.type==="checkbox") dst[i].checked=el.checked;
-  });
-  clone.classList.add("pdf-exporting");
-  clone.querySelectorAll("button").forEach(b=>b.remove());
-  const filename=(read($("name")).trim()||"Personnage").replace(/[\\/:*?"<>|]/g,"_")+".pdf";
-  try {
-    await html2pdf().set({
-      margin:[10,10,10,10], filename,
-      image:{type:"jpeg",quality:0.96},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false},
-      jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
-      pagebreak:{mode:["css","legacy"],avoid:[".skill-line",".stat-box",".combat-stat"]}
-    }).from(clone).save();
-  } catch(err) {
-    console.error("Erreur PDF :",err); alert("Erreur pendant la création du PDF.");
+
+  const hitDieInput = prompt(
+    "Dé de vie ? (6, 8, 10 ou 12)",
+    "8"
+  );
+
+  const hitDie = [6, 8, 10, 12].includes(Number(hitDieInput))
+    ? Number(hitDieInput)
+    : 8;
+
+  classDatabase[cleanName] = { hitDie };
+  refreshClasses();
+
+  $("class").value = cleanName;
+  calculate();
+}
+
+// ===================================
+// JETS DE SAUVEGARDE ET COMPÉTENCES
+// ===================================
+
+function buildSaveAndSkillLists() {
+  const saves = $("saves");
+  const skills = $("skills");
+
+  if (saves) {
+    saves.innerHTML = "";
+
+    Object.entries(abilityNames).forEach(([key, name]) => {
+      const label = makeElement("label", "check-line");
+      const checkbox = document.createElement("input");
+
+      checkbox.type = "checkbox";
+      checkbox.dataset.save = key;
+
+      label.append(checkbox);
+      label.append(makeElement("span", "", name));
+      saves.append(label);
+    });
+  }
+
+  if (skills) {
+    skills.innerHTML = "";
+
+    skillData.forEach(([name, stat]) => {
+      const label = makeElement("label", "check-line");
+      const checkbox = document.createElement("input");
+
+      checkbox.type = "checkbox";
+      checkbox.dataset.skill = name;
+
+      label.append(checkbox);
+      label.append(makeElement("span", "", name));
+      label.append(makeElement("small", "skill-bonus", "+0"));
+
+      skills.append(label);
+    });
   }
 }
 
-// Rendre les fonctions accessibles aux onclick="" du HTML.
-Object.assign(window,{
-  addClass,addAttack,addAbility,addSpell,addEquipment,addItem,addQuest,
-  saveCharacter,loadCharacter,exportPDF,calculate
-});
+// ===================================
+// EMPLACEMENTS DE SORTS
+// ===================================
+
+function buildSpellSlots() {
+  const container = $("slots");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  for (let level = 1; level <= 9; level++) {
+    const wrapper = makeElement("label", "slot-line");
+
+    wrapper.append(
+      makeElement("span", "", `Niv. ${level}`)
+    );
+
+    const input = makeElement("input", "slot-input");
+    input.type = "number";
+    input.min = "0";
+    input.max = "9";
+    input.value = "0";
+    input.dataset.slot = level;
+
+    wrapper.append(input);
+    container.append(wrapper);
+  }
+}
+
+// ===================================
+// CALCUL DES CARACTÉRISTIQUES
+// ===================================
+
+function calculate() {
+  const stats = ["str", "dex", "con", "int", "wis", "cha"];
+
+  const modifiers = {};
+
+  stats.forEach(stat => {
+    modifiers[stat] = getStat(stat);
+  });
+
+  const modifierContainer = $("modifiers");
+
+  if (modifierContainer) {
+    modifierContainer.innerHTML = stats.map(stat => `
+      <div class="modifier-item">
+        <strong>${abilityNames[stat]}</strong>
+        <span>${signed(modifiers[stat])}</span>
+      </div>
+    `).join("");
+  }
+
+  const level = Math.max(1, getValue("level", 1));
+  const proficiency = profBonus(level);
+
+  set("prof", signed(proficiency));
+
+  // Initiative
+  set("initiative", signed(modifiers.dex));
+
+  // Classe d'armure
+  const armor = $("armor")?.value || "none";
+  const dex = modifiers.dex;
+  const shield = $("shield")?.checked ? 2 : 0;
+  let ac = 10 + dex;
+
+  switch (armor) {
+    case "light":
+      ac = 11 + dex;
+      break;
+
+    case "medium":
+      ac = 14 + Math.min(2, dex);
+      break;
+
+    case "heavy":
+      ac = 16;
+      break;
+
+    case "none":
+    default:
+      ac = 10 + dex;
+      break;
+  }
+
+  if ($("customAC")?.value.trim()) {
+    ac = number($("customAC").value, ac);
+  }
+
+  ac += shield;
+  set("ac", ac);
+
+  // Points de vie maximum
+  const className = $("class")?.value;
+  const hitDie = classDatabase[className]?.hitDie || 8;
+  const constitution = modifiers.con;
+
+  const firstLevel = hitDie + constitution;
+  const otherLevels = Math.max(0, level - 1) *
+    (Math.floor(hitDie / 2) + 1 + constitution);
+
+  const maxHP = Math.max(
+    level,
+    firstLevel + otherLevels
+  );
+
+  set("maxhp", maxHP);
+
+  // Jets de sauvegarde
+  document.querySelectorAll("[data-save]").forEach(checkbox => {
+    const stat = checkbox.dataset.save;
+    const bonus = modifiers[stat] +
+      (checkbox.checked ? proficiency : 0);
+
+    const output = checkbox.closest("label")?.querySelector("small");
+
+    if (output) output.textContent = signed(bonus);
+  });
+
+  // Compétences
+  document.querySelectorAll("[data-skill]").forEach(checkbox => {
+    const skill = skillData.find(
+      item => item[0] === checkbox.dataset.skill
+    );
+
+    if (!skill) return;
+
+    const stat = skill[1];
+    const bonus = modifiers[stat] +
+      (checkbox.checked ? proficiency : 0);
+
+    const output = checkbox.closest("label")?.querySelector("small");
+
+    if (output) output.textContent = signed(bonus);
+  });
+
+  // Magie
+  const magicStat = $("magicStat")?.value || "int";
+  const magicModifier = modifiers[magicStat];
+
+  set("spellDC", 8 + proficiency + magicModifier);
+  set("spellAttack", signed(proficiency + magicModifier));
+
+  // Bonus des attaques
+  document.querySelectorAll("[data-attack]").forEach(row => {
+    const stat = row.querySelector(".attack-stat")?.value || "str";
+    const proficient = row.querySelector(".attack-prof")?.checked;
+
+    const bonus = modifiers[stat] +
+      (proficient ? proficiency : 0);
+
+    const output = row.querySelector(".attack-bonus");
+
+    if (output) output.value = signed(bonus);
+  });
+}
+
+// ===================================
+// ATTAQUES
+// ===================================
+
+function addAttack(data = {}) {
+  const row = createRow("attacks", "attack-row");
+  if (!row) return;
+
+  row.dataset.attack = "true";
+
+  row.append(
+    field("Arme / attaque", "attack-name"),
+    selectField("Caractéristique", "attack-stat", [
+      { value: "str", label: "Force" },
+      { value: "dex", label: "Dextérité" }
+    ]),
+    checkboxField("Maîtrise", "attack-prof"),
+    field("Bonus", "attack-bonus"),
+    field("Dégâts", "attack-damage"),
+    field("Type", "attack-type"),
+    field("Portée", "attack-range"),
+    textarea("Description", "attack-description"),
+    deleteButton()
+  );
+
+  row.querySelector(".attack-name").value = data.name || "";
+  row.querySelector(".attack-stat").value = data.stat || "str";
+  row.querySelector(".attack-prof").checked = !!data.proficient;
+  row.querySelector(".attack-bonus").value = data.bonus || "";
+  row.querySelector(".attack-damage").value = data.damage || "";
+  row.querySelector(".attack-type").value = data.type || "";
+  row.querySelector(".attack-range").value = data.range || "";
+  row.querySelector(".attack-description").value = data.description || "";
+
+  wireCalculation(row);
+  calculate();
+}
+
+// ===================================
+// CAPACITÉS DE COMBAT
+// ===================================
+
+function addAbility(data = {}) {
+  const row = createRow("abilities", "ability-row");
+  if (!row) return;
+
+  row.append(
+    field("Nom", "ability-name"),
+    field("Type", "ability-type"),
+    field("Utilisations", "ability-uses"),
+    textarea("Description", "ability-description"),
+    deleteButton()
+  );
+
+  row.querySelector(".ability-name").value = data.name || "";
+  row.querySelector(".ability-type").value = data.type || "";
+  row.querySelector(".ability-uses").value = data.uses || "";
+  row.querySelector(".ability-description").value =
+    data.description || "";
+
+  wireCalculation(row);
+}
+
+// ===================================
+// CAPACITÉS HORS COMBAT
+// ===================================
+
+function addExtraAbility(data = {}) {
+  const row = createRow("extra-abilities", "extra-ability-row");
+  if (!row) return;
+
+  row.append(
+    field("Nom", "extra-ability-name"),
+    field("Type", "extra-ability-type"),
+    field("Utilisations", "extra-ability-uses"),
+    textarea("Description", "extra-ability-description"),
+    deleteButton()
+  );
+
+  row.querySelector(".extra-ability-name").value = data.name || "";
+  row.querySelector(".extra-ability-type").value = data.type || "";
+  row.querySelector(".extra-ability-uses").value = data.uses || "";
+  row.querySelector(".extra-ability-description").value =
+    data.description || "";
+
+  wireCalculation(row);
+}
+
+// ===================================
+// SORTS DE COMBAT
+// ===================================
+
+function addCombatSpell(data = {}) {
+  const row = createRow("combat-spells", "combat-spell-row");
+  if (!row) return;
+
+  row.append(
+    field("Sort", "combat-spell-name"),
+    field("Niveau", "combat-spell-level", "number"),
+    field("Temps d'incantation", "combat-spell-time"),
+    field("Portée", "combat-spell-range"),
+    checkboxField("Concentration", "combat-spell-concentration"),
+    textarea("Effet", "combat-spell-description"),
+    deleteButton()
+  );
+
+  row.querySelector(".combat-spell-name").value = data.name || "";
+  row.querySelector(".combat-spell-level").value = data.level ?? 0;
+  row.querySelector(".combat-spell-time").value = data.time || "";
+  row.querySelector(".combat-spell-range").value = data.range || "";
+  row.querySelector(".combat-spell-concentration").checked =
+    !!data.concentration;
+  row.querySelector(".combat-spell-description").value =
+    data.description || "";
+
+  wireCalculation(row);
+}
+
+// ===================================
+// SORTS
+// ===================================
+
+function addSpell(data = {}) {
+  const row = createRow("spells", "spell-row");
+  if (!row) return;
+
+  row.append(
+    field("Nom du sort", "spell-name"),
+    field("Niveau", "spell-level", "number"),
+    field("Temps d'incantation", "spell-time"),
+    field("Portée", "spell-range"),
+    textarea("Description / effets", "spell-description"),
+    deleteButton()
+  );
+
+  row.querySelector(".spell-name").value = data.name || "";
+  row.querySelector(".spell-level").value = data.level ?? 0;
+  row.querySelector(".spell-time").value = data.time || "";
+  row.querySelector(".spell-range").value = data.range || "";
+  row.querySelector(".spell-description").value =
+    data.description || "";
+
+  wireCalculation(row);
+}
+
+// ===================================
+// ÉQUIPEMENT ET INVENTAIRE
+// ===================================
+
+function addEquipment(data = {}) {
+  addSimpleItem("equipment", "equipment-row", data);
+}
+
+function addItem(data = {}) {
+  addSimpleItem("inventory", "inventory-row", data);
+}
+
+function addSimpleItem(containerId, className, data = {}) {
+  const row = createRow(containerId, className);
+  if (!row) return;
+
+  row.append(
+    field("Objet", "item-name"),
+    field("Quantité", "item-quantity", "number"),
+    field("Poids", "item-weight"),
+    textarea("Description", "item-description"),
+    deleteButton()
+  );
+
+  row.querySelector(".item-name").value = data.name || "";
+  row.querySelector(".item-quantity").value = data.quantity ?? 1;
+  row.querySelector(".item-weight").value = data.weight || "";
+  row.querySelector(".item-description").value =
+    data.description || "";
+
+  wireCalculation(row);
+}
+
+// ===================================
+// QUÊTES
+// ===================================
+
+function addQuest(data = {}) {
+  const row = createRow("quests", "quest-row");
+  if (!row) return;
+
+  row.append(
+    field("Nom de la quête", "quest-name"),
+    selectField("Statut", "quest-status", [
+      { value: "En cours", label: "En cours" },
+      { value: "Terminée", label: "Terminée" },
+      { value: "Échouée", label: "Échouée" }
+    ]),
+    textarea("Objectif / détails", "quest-objective"),
+    deleteButton()
+  );
+
+  row.querySelector(".quest-name").value = data.name || "";
+  row.querySelector(".quest-status").value =
+    data.status || "En cours";
+  row.querySelector(".quest-objective").value =
+    data.objective || "";
+
+  wireCalculation(row);
+}
+
+// ===================================
+// AJOUT DES BOUTONS MANQUANTS
+// ===================================
+
+function addDynamicButton(containerId, label, callback, buttonId) {
+  const container = $(containerId);
+  if (!container || $(buttonId)) return;
+
+  const button = makeElement("button", "add-button", label);
+  button.type = "button";
+  button.id = buttonId;
+  button.addEventListener("click", callback);
+
+  container.insertAdjacentElement("afterend", button);
+}
+
+// ===================================
+// ÉVÉNEMENTS
+// ===================================
+
+function wireCalculation(element) {
+  element.querySelectorAll("input, select, textarea").forEach(input => {
+    input.addEventListener("input", calculate);
+    input.addEventListener("change", calculate);
+  });
+}
+
+// ===================================
+// COLLECTE DES DONNÉES
+// ===================================
+
+function collectRows(containerId, selector, mapper) {
+  const container = $(containerId);
+  if (!container) return [];
+
+  return [...container.querySelectorAll(selector)].map(mapper);
+}
+
+function collectCharacter() {
+  const character = {
+    fields: {},
+    checkboxes: {},
+    slots: {},
+    classes: { ...classDatabase }
+  };
+
+  // Champs fixes
+  document.querySelectorAll(
+    "#character-sheet input[id], " +
+    "#character-sheet select[id], " +
+    "#character-sheet textarea[id]"
+  ).forEach(element => {
+    if (element.type === "checkbox") {
+      character.checkboxes[element.id] = element.checked;
+    } else {
+      character.fields[element.id] = element.value;
+    }
+  });
+
+  // Cases de maîtrise
+  document.querySelectorAll("[data-save]").forEach(element => {
+    character.checkboxes[`save:${element.dataset.save}`] =
+      element.checked;
+  });
+
+  document.querySelectorAll("[data-skill]").forEach(element => {
+    character.checkboxes[`skill:${element.dataset.skill}`] =
+      element.checked;
+  });
+
+  // Emplacements de sorts
+  document.querySelectorAll("[data-slot]").forEach(element => {
+    character.slots[element.dataset.slot] = element.value;
+  });
+
+  // Attaques
+  character.attacks = collectRows(
+    "attacks",
+    "[data-attack]",
+    row => ({
+      name: row.querySelector(".attack-name")?.value || "",
+      stat: row.querySelector(".attack-stat")?.value || "str",
+      proficient: !!row.querySelector(".attack-prof")?.checked,
+      bonus: row.querySelector(".attack-bonus")?.value || "",
+      damage: row.querySelector(".attack-damage")?.value || "",
+      type: row.querySelector(".attack-type")?.value || "",
+      range: row.querySelector(".attack-range")?.value || "",
+      description:
+        row.querySelector(".attack-description")?.value || ""
+    })
+  );
+
+  // Capacités de combat
+  character.abilities = collectRows(
+    "abilities",
+    ".ability-row",
+    row => ({
+      name: row.querySelector(".ability-name")?.value || "",
+      type: row.querySelector(".ability-type")?.value || "",
+      uses: row.querySelector(".ability-uses")?.value || "",
+      description:
+        row.querySelector(".ability-description")?.value || ""
+    })
+  );
+
+  // Capacités hors combat
+  character.extraAbilities = collectRows(
+    "extra-abilities",
+    ".extra-ability-row",
+    row => ({
+      name: row.querySelector(".extra-ability-name")?.value || "",
+      type: row.querySelector(".extra-ability-type")?.value || "",
+      uses: row.querySelector(".extra-ability-uses")?.value || "",
+      description:
+        row.querySelector(".extra-ability-description")?.value || ""
+    })
+  );
+
+  // Sorts de combat
+  character.combatSpells = collectRows(
+    "combat-spells",
+    ".combat-spell-row",
+    row => ({
+      name: row.querySelector(".combat-spell-name")?.value || "",
+      level: row.querySelector(".combat-spell-level")?.value || 0,
+      time: row.querySelector(".combat-spell-time")?.value || "",
+      range: row.querySelector(".combat-spell-range")?.value || "",
+      concentration:
+        !!row.querySelector(".combat-spell-concentration")?.checked,
+      description:
+        row.querySelector(".combat-spell-description")?.value || ""
+    })
+  );
+
+  // Sorts
+  character.spells = collectRows(
+    "spells",
+    ".spell-row",
+    row => ({
+      name: row.querySelector(".spell-name")?.value || "",
+      level: row.querySelector(".spell-level")?.value || 0,
+      time: row.querySelector(".spell-time")?.value || "",
+      range: row.querySelector(".spell-range")?.value || "",
+      description:
+        row.querySelector(".spell-description")?.value || ""
+    })
+  );
+
+  // Équipement
+  character.equipment = collectRows(
+    "equipment",
+    ".equipment-row",
+    row => ({
+      name: row.querySelector(".item-name")?.value || "",
+      quantity: row.querySelector(".item-quantity")?.value || 1,
+      weight: row.querySelector(".item-weight")?.value || "",
+      description:
+        row.querySelector(".item-description")?.value || ""
+    })
+  );
+
+  // Inventaire
+  character.inventory = collectRows(
+    "inventory",
+    ".inventory-row",
+    row => ({
+      name: row.querySelector(".item-name")?.value || "",
+      quantity: row.querySelector(".item-quantity")?.value || 1,
+      weight: row.querySelector(".item-weight")?.value || "",
+      description:
+        row.querySelector(".item-description")?.value || ""
+    })
+  );
+
+  // Quêtes
+  character.quests = collectRows(
+    "quests",
+    ".quest-row",
+    row => ({
+      name: row.querySelector(".quest-name")?.value || "",
+      status: row.querySelector(".quest-status")?.value || "En cours",
+      objective: row.querySelector(".quest-objective")?.value || ""
+    })
+  );
+
+  return character;
+}
+
+// ===================================
+// SAUVEGARDE
+// ===================================
+
+function saveCharacter() {
+  try {
+    const character = collectCharacter();
+
+    localStorage.setItem(
+      SAVE_KEY,
+      JSON.stringify(character)
+    );
+
+    alert("Personnage sauvegardé !");
+  } catch (error) {
+    console.error(error);
+    alert("Erreur lors de la sauvegarde.");
+  }
+}
+
+// ===================================
+// CHARGEMENT
+// ===================================
+
+function loadCharacter() {
+  let raw;
+
+  try {
+    raw = localStorage.getItem(SAVE_KEY);
+
+    if (!raw) {
+      alert("Aucune sauvegarde trouvée.");
+      return;
+    }
+
+    const character = JSON.parse(raw);
+
+    // Classes personnalisées
+    if (character.classes) {
+      Object.assign(classDatabase, character.classes);
+    }
+
+    refreshClasses();
+
+    // Champs fixes
+    Object.entries(character.fields || {}).forEach(([id, value]) => {
+      const element = $(id);
+      if (element) element.value = value;
+    });
+
+    // Cases à cocher fixes
+    Object.entries(character.checkboxes || {}).forEach(([id, value]) => {
+      if (id.startsWith("save:")) {
+        const element = document.querySelector(
+          `[data-save="${id.slice(5)}"]`
+        );
+        if (element) element.checked = value;
+        return;
+      }
+
+      if (id.startsWith("skill:")) {
+        const element = document.querySelector(
+          `[data-skill="${id.slice(6)}"]`
+        );
+        if (element) element.checked = value;
+        return;
+      }
+
+      const element = $(id);
+      if (element && element.type === "checkbox") {
+        element.checked = value;
+      }
+    });
+
+    // Emplacements de sorts
+    Object.entries(character.slots || {}).forEach(([level, value]) => {
+      const element = document.querySelector(
+        `[data-slot="${level}"]`
+      );
+      if (element) element.value = value;
+    });
+
+    // Nettoyage des anciennes lignes
+    [
+      "attacks",
+      "abilities",
+      "extra-abilities",
+      "combat-spells",
+      "spells",
+      "equipment",
+      "inventory",
+      "quests"
+    ].forEach(id => {
+      if ($(id)) $(id).innerHTML = "";
+    });
+
+    // Reconstruction des lignes
+    (character.attacks || []).forEach(addAttack);
+    (character.abilities || []).forEach(addAbility);
+    (character.extraAbilities || []).forEach(addExtraAbility);
+    (character.combatSpells || []).forEach(addCombatSpell);
+    (character.spells || []).forEach(addSpell);
+    (character.equipment || []).forEach(addEquipment);
+    (character.inventory || []).forEach(addItem);
+    (character.quests || []).forEach(addQuest);
+
+    calculate();
+
+    alert("Personnage chargé !");
+  } catch (error) {
+    console.error(error);
+    alert("Impossible de charger cette sauvegarde.");
+  }
+}
+
+// ===================================
+// EXPORT PDF
+// ===================================
+
+async function exportPDF() {
+  const original = $("character-sheet");
+
+  if (!original) {
+    alert("Fiche introuvable.");
+    return;
+  }
+
+  if (typeof html2pdf === "undefined") {
+    alert("La bibliothèque PDF n'est pas chargée.");
+    return;
+  }
+
+  const clone = original.cloneNode(true);
+
+  // Recopie des valeurs des champs
+  const originalFields = original.querySelectorAll(
+    "input, textarea, select"
+  );
+
+  const clonedFields = clone.querySelectorAll(
+    "input, textarea, select"
+  );
+
+  originalFields.forEach((field, index) => {
+    const copy = clonedFields[index];
+    if (!copy) return;
+
+    if (field.type === "checkbox") {
+      copy.checked = field.checked;
+    } else {
+      copy.value = field.value;
+    }
+  });
+
+  // Remplacement des zones de texte par du texte imprimable
+  const originalTextareas = original.querySelectorAll("textarea");
+  const clonedTextareas = clone.querySelectorAll("textarea");
+
+  originalTextareas.forEach((field, index) => {
+    const copy = clonedTextareas[index];
+    if (!copy) return;
+
+    const content = makeElement(
+      "div",
+      "pdf-textarea-content"
+    );
+
+    content.textContent = field.value || " ";
+    content.style.whiteSpace = "pre-wrap";
+    content.style.overflowWrap = "anywhere";
+    content.style.wordBreak = "break-word";
+    content.style.minHeight =
+      Math.max(field.scrollHeight, field.clientHeight) + "px";
+
+    copy.replaceWith(content);
+  });
+
+  // Retrait des boutons d'interface
+  clone.querySelectorAll(
+    "button, .delete-button, .add-button, .no-print"
+  ).forEach(element => element.remove());
+
+  // Nom du fichier
+  const characterName =
+    $("name")?.value.trim() || "personnage";
+
+  const safeName = characterName
+    .replace(/[^a-z0-9-_]/gi, "_");
+
+  clone.classList.add("pdf-exporting");
+
+  const holder = makeElement("div", "pdf-export-holder");
+  holder.style.position = "absolute";
+  holder.style.left = "-100000px";
+  holder.style.top = "0";
+  holder.style.width = original.offsetWidth + "px";
+  holder.style.background = "#ffffff";
+
+  holder.append(clone);
+  document.body.append(holder);
+
+  try {
+    await html2pdf()
+      .set({
+        margin: 0,
+        filename: `${safeName}.pdf`,
+        image: {
+          type: "jpeg",
+          quality: 0.98
+        },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: original.scrollWidth
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait"
+        },
+        pagebreak: {
+          mode: ["css", "legacy"],
+          avoid: [
+            ".attack-row",
+            ".ability-row",
+            ".skill-line",
+            ".stat-box"
+          ]
+        }
+      })
+      .from(clone)
+      .save();
+  } catch (error) {
+    console.error(error);
+    alert("Erreur lors de la création du PDF.");
+  } finally {
+    holder.remove();
+  }
+}
+
+// ===================================
+// INITIALISATION
+// ===================================
 
 function initialize() {
-  if(window.__dndManagerInitialized) return;
-  window.__dndManagerInitialized=true;
   buildSaveAndSkillLists();
   buildSpellSlots();
-  refreshClasses("Guerrier");
-  document.addEventListener("input",e=>{
-    if(e.target.matches("input,select")) calculate();
+  refreshClasses();
+
+  addDynamicButton(
+    "combat-spells",
+    "+ Ajouter un sort de combat",
+    () => addCombatSpell(),
+    "add-combat-spell"
+  );
+
+  addDynamicButton(
+    "extra-abilities",
+    "+ Ajouter une capacité hors combat",
+    () => addExtraAbility(),
+    "add-extra-ability"
+  );
+
+  // Calcul automatique
+  document.querySelectorAll(
+    "#character-sheet input, " +
+    "#character-sheet select, " +
+    "#character-sheet textarea"
+  ).forEach(element => {
+    element.addEventListener("input", calculate);
+    element.addEventListener("change", calculate);
   });
-  document.addEventListener("change",e=>{
-    if(e.target.matches("input,select")) calculate();
-  });
+
   calculate();
-  console.log("D&D Character Manager : initialisé correctement.");
 }
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",initialize);
-else initialize();
+
+// ===================================
+// EXPOSITION DES FONCTIONS HTML
+// ===================================
+
+window.saveCharacter = saveCharacter;
+window.loadCharacter = loadCharacter;
+window.exportPDF = exportPDF;
+window.addClass = addClass;
+window.addAttack = addAttack;
+window.addAbility = addAbility;
+window.addSpell = addSpell;
+window.addEquipment = addEquipment;
+window.addItem = addItem;
+window.addQuest = addQuest;
+window.addCombatSpell = addCombatSpell;
+window.addExtraAbility = addExtraAbility;
+
+// ===================================
+// DÉMARRAGE
+// ===================================
+
+document.addEventListener("DOMContentLoaded", initialize);

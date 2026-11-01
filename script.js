@@ -599,8 +599,10 @@ function loadCharacter() {
 // EXPORT PDF
 // ===================================
 
+
 async function exportPDF() {
   const button = document.activeElement;
+  let clone = null;
 
   try {
     if (typeof html2pdf === "undefined") {
@@ -615,6 +617,50 @@ async function exportPDF() {
       return;
     }
 
+    // Crée une copie pour le PDF
+    clone = element.cloneNode(true);
+
+    // Supprime les boutons de la copie
+    clone.querySelectorAll("button").forEach(el => el.remove());
+
+    // Supprime les lignes dynamiques sans nom
+    const emptyRows = [
+      [".row-item", ".attack-name"],
+      [".row-item", ".ability-name"],
+      [".row-item", ".spell-name"],
+      [".row-item", ".item-name"],
+      [".row-item", ".quest-name"]
+    ];
+
+    emptyRows.forEach(([rowSelector, nameSelector]) => {
+      clone.querySelectorAll(rowSelector).forEach(row => {
+        const name = row.querySelector(nameSelector);
+
+        if (!name || !name.value.trim()) {
+          row.remove();
+        }
+      });
+    });
+
+    // Masque les champs facultatifs vides
+    clone.querySelectorAll("label").forEach(label => {
+      const fields = label.querySelectorAll("input, textarea");
+
+      if (!fields.length) return;
+
+      // Ne masque pas les cases à cocher
+      if (label.querySelector('input[type="checkbox"]')) return;
+
+      const hasContent = Array.from(fields).some(field =>
+        field.value.trim() !== ""
+      );
+
+      if (!hasContent) {
+        label.style.display = "none";
+      }
+    });
+
+    // Prépare l'export
     document.body.classList.add("pdf-exporting");
 
     const filename =
@@ -649,7 +695,7 @@ async function exportPDF() {
 
     await html2pdf()
       .set(options)
-      .from(element)
+      .from(clone)
       .save();
 
   } catch (error) {
@@ -664,6 +710,7 @@ async function exportPDF() {
     }
   }
 }
+
 
 // ===================================
 // INITIALISATION

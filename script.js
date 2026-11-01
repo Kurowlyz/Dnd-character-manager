@@ -522,8 +522,9 @@ async function exportPDF() {
     },
 
     pagebreak: {
-      mode: ["css", "legacy"],
-      avoid: [".panel", ".row-item"]
+  mode: ["css", "legacy"],
+  before: [".panel:nth-child(6)"]
+}
     }
   };
 

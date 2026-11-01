@@ -520,10 +520,9 @@ async function exportPDF() {
       format: "a4",
       orientation: "portrait"
     },
-
-    pagebreak: {
-  mode: ["css", "legacy"],
-  before: [".panel:nth-child(6)"]
+pagebreak: {
+  mode: ["css", "legacy"]
+}
 }
     }
   };

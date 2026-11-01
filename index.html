@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D&D Character Manager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>⚔️ D&D CHARACTER MANAGER</h1>
+  <p>Gestionnaire de personnages – D&D 5e</p>
+  <div class="actions">
+    <button onclick="saveCharacter()">💾 Sauvegarder</button>
+    <button onclick="loadCharacter()">📂 Charger</button>
+   <button onclick="exportPDF()">📄 Exporter PDF</button> </button>
+  </div>
+</header>
+
+<main>
+
+<section class="panel">
+<h2>Identité</h2>
+<div class="grid">
+  <label>Nom<input id="name"></label>
+  <label>Race<input id="race"></label>
+ <label>Classe
+  <select id="class"></select>
+</label>
+
+<button type="button" onclick="addClass()">
+  + Créer une classe
+</button>
+
+    </select>
+  </label>
+  <label>Niveau<input id="level" type="number" min="1" max="20" value="1"></label>
+  <label>Historique<input id="background"></label>
+  <label>Alignement<input id="alignment"></label>
+</div>
+</section>
+
+<section class="panel">
+<h2>Caractéristiques</h2>
+<div class="stats">
+  <div>FOR<input id="str" type="number" value="10"></div>
+  <div>DEX<input id="dex" type="number" value="10"></div>
+  <div>CON<input id="con" type="number" value="10"></div>
+  <div>INT<input id="int" type="number" value="10"></div>
+  <div>SAG<input id="wis" type="number" value="10"></div>
+  <div>CHA<input id="cha" type="number" value="10"></div>
+</div>
+<p id="modifiers"></p>
+</section>
+
+<section class="panel">
+<h2>Combat</h2>
+<div class="grid">
+  <label>Points de vie actuels<input id="hp" type="number" value="10"></label>
+  <label>Points de vie maximum<input id="maxhp" readonly></label>
+  <label>Classe d'armure<input id="ac" readonly></label>
+  <label>Initiative<input id="initiative" readonly></label>
+  <label>Vitesse (pieds)<input id="speed" type="number" value="30"></label>
+  <label>Bonus de maîtrise<input id="prof" readonly></label>
+  <label>Type d'armure
+    <select id="armor">
+      <option value="none">Sans armure</option>
+      <option value="light">Légère (cuir)</option>
+      <option value="medium">Intermédiaire (cuirasse)</option>
+      <option value="heavy">Lourde (harnois)</option>
+      <option value="custom">Personnalisée</option>
+    </select>
+  </label>
+  <label>CA de base personnalisée<input id="customAC" type="number" value="10"></label>
+  <label>Bouclier équipé
+    <select id="shield">
+      <option value="0">Non</option>
+      <option value="2">Oui (+2 CA)</option>
+    </select>
+  </label>
+</div>
+</section>
+
+<section class="panel">
+<h2>Jets de sauvegarde</h2>
+<div id="saves" class="list"></div>
+</section>
+
+<section class="panel">
+<h2>Compétences</h2>
+<p class="hint">Coche les maîtrises. Les bonus sont calculés automatiquement.</p>
+<div id="skills" class="list"></div>
+</section>
+
+<section class="panel">
+<h2>Attaques et techniques</h2>
+<div id="attacks"></div>
+<button onclick="addAttack()">+ Ajouter une attaque</button>
+</section>
+
+<section class="panel">
+<h2>Capacités spéciales et pouvoirs</h2>
+<div id="abilities"></div>
+<button onclick="addAbility()">+ Ajouter une capacité</button>
+</section>
+
+<section class="panel">
+<h2>Magie et sorts</h2>
+<div class="grid">
+  <label>Caractéristique magique
+    <select id="magicStat">
+      <option value="int">Intelligence</option>
+      <option value="wis">Sagesse</option>
+      <option value="cha">Charisme</option>
+    </select>
+  </label>
+  <label>Degré de difficulté des sorts<input id="spellDC" readonly></label>
+  <label>Bonus d'attaque magique<input id="spellAttack" readonly></label>
+</div>
+<h3>Emplacements de sorts</h3>
+<div class="slots" id="slots"></div>
+<button onclick="addSpell()">+ Ajouter un sort</button>
+<div id="spells"></div>
+</section>
+
+<section class="panel">
+<h2>Inventaire et équipement</h2>
+<h3>Équipement</h3>
+<div id="equipment"></div>
+<button onclick="addEquipment()">+ Ajouter un équipement</button>
+<h3>Inventaire</h3>
+<div id="inventory"></div>
+<button onclick="addItem()">+ Ajouter un objet</button>
+<h3>Monnaie</h3>
+<div class="grid">
+  <label>Pièces de cuivre (PC)<input id="pc" type="number" value="0"></label>
+  <label>Pièces d'argent (PA)<input id="pa" type="number" value="0"></label>
+  <label>Pièces d'électrum (PE)<input id="pe" type="number" value="0"></label>
+  <label>Pièces d'or (PO)<input id="po" type="number" value="0"></label>
+  <label>Pièces de platine (PP)<input id="pp" type="number" value="0"></label>
+</div>
+</section>
+
+<section class="panel">
+<h2>Personnalité et apparence</h2>
+<label>Traits de personnalité<textarea id="personality"></textarea></label>
+<label>Idéaux<textarea id="ideals"></textarea></label>
+<label>Liens<textarea id="bonds"></textarea></label>
+<label>Défauts<textarea id="flaws"></textarea></label>
+<label>Apparence physique<textarea id="appearance"></textarea></label>
+<label>Histoire du personnage<textarea id="story"></textarea></label>
+</section>
+
+<section class="panel">
+<h2>Quêtes et objectifs</h2>
+<div id="quests"></div>
+<button onclick="addQuest()">+ Ajouter une quête</button>
+</section>
+
+</main>
+
+<footer>
+  <button onclick="saveCharacter()">💾 Sauvegarder</button>
+<button onclick="exportPDF()">📄 Exporter PDF</button>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

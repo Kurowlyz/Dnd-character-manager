@@ -1,0 +1,269 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #17191f;
+  color: #eee;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: #242833;
+  padding: 20px 12px;
+  text-align: center;
+  border-bottom: 2px solid #bd8b42;
+}
+
+header h1 {
+  color: #e7b968;
+  font-size: 21px;
+}
+
+header p, .hint {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+main {
+  max-width: 850px;
+  margin: auto;
+  padding: 12px;
+}
+
+.panel {
+  background: #242833;
+  border: 1px solid #414653;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  break-inside: avoid;
+}
+
+h2 {
+  color: #e7b968;
+  font-size: 19px;
+  border-bottom: 1px solid #555;
+  padding-bottom: 9px;
+}
+
+h3 {
+  color: #e7b968;
+  font-size: 15px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 9px 0;
+  font-size: 13px;
+  color: #ccc;
+}
+
+input, select, textarea {
+  width: 100%;
+  background: #17191f;
+  color: white;
+  border: 1px solid #555d6c;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 15px;
+  min-width: 0;
+}
+
+input[readonly] {
+  background: #343a47;
+  color: #e7b968;
+  font-weight: bold;
+}
+
+textarea {
+  min-height: 75px;
+  resize: vertical;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.stats div {
+  background: #17191f;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  color: #e7b968;
+  font-weight: bold;
+}
+
+.stats input {
+  margin-top: 8px;
+  text-align: center;
+}
+
+button {
+  background: #9b6a2e;
+  color: white;
+  border: 0;
+  border-radius: 7px;
+  padding: 11px 14px;
+  font-weight: bold;
+  margin: 5px 2px;
+  cursor: pointer;
+}
+
+button:active {
+  background: #bd8b42;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.row-item {
+  background: #17191f;
+  padding: 9px;
+  border-radius: 7px;
+  margin: 7px 0;
+}
+
+.row-item label {
+  margin: 4px 0;
+}
+
+.row-item button {
+  background: #733e3e;
+}
+
+.skill-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #17191f;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.skill-line input {
+  width: auto;
+}
+
+.skill-line strong {
+  color: #e7b968;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+}
+
+@media(max-width: 420px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  header, footer, button {
+    display: none !important;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .panel {
+    background: white;
+    color: black;
+    border: 1px solid #999;
+    margin-bottom: 10px;
+    break-inside: avoid;
+  }
+
+  h2, h3 {
+    color: #754b20;
+  }
+
+  input, select, textarea {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #aaa;
+  }
+
+  .row-item, .skill-line, .stats div {
+    background: white;
+    color: black;
+    border: 1px solid #ddd;
+  }
+
+  .hint {
+    color: #555;
+  }
+}/* STYLE EXPORT PDF */
+
+.pdf-exporting {
+  background: white !important;
+  color: black !important;
+}
+
+.pdf-exporting .panel {
+  background: white !important;
+  color: black !important;
+  border: 1px solid #999;
+}
+
+.pdf-exporting h2,
+.pdf-exporting h3 {
+  color: #754b20 !important;
+}
+
+.pdf-exporting input,
+.pdf-exporting select,
+.pdf-exporting textarea {
+  background: white !important;
+  color: black !important;
+}
+
+.pdf-exporting button {
+  display: none !important;
+}
+
+.pdf-exporting .skill-line,
+.pdf-exporting .row-item,
+.pdf-exporting .stats div {
+  background: white !important;
+  color: black !important;
+  border: 1px solid #ddd;
+}

@@ -1090,10 +1090,14 @@ async function exportPDF() {
 // ===================================
 
 function initialize() {
-  buildSaveAndSkillLists();
+function initialize() {
+  // Construction des emplacements de sorts
   buildSpellSlots();
+
+  // Chargement des classes
   refreshClasses();
 
+  // Bouton pour ajouter les sorts de combat
   addDynamicButton(
     "combat-spells",
     "+ Ajouter un sort de combat",
@@ -1101,12 +1105,26 @@ function initialize() {
     "add-combat-spell"
   );
 
+  // Bouton pour ajouter les capacités hors combat
   addDynamicButton(
     "extra-abilities",
     "+ Ajouter une capacité hors combat",
     () => addExtraAbility(),
     "add-extra-ability"
   );
+
+  // Calcul automatique
+  document.querySelectorAll(
+    "#character-sheet input, " +
+    "#character-sheet select, " +
+    "#character-sheet textarea"
+  ).forEach(element => {
+    element.addEventListener("input", calculate);
+    element.addEventListener("change", calculate);
+  });
+
+  calculate();
+}
 
   // Calcul automatique
   document.querySelectorAll(
